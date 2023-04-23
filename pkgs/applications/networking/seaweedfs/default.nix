@@ -7,16 +7,16 @@
 
 buildGoModule rec {
   pname = "seaweedfs";
-  version = "3.34";
+  version = "3.46";
 
   src = fetchFromGitHub {
-    owner = "chrislusf";
+    owner = "seaweedfs";
     repo = "seaweedfs";
     rev = version;
-    hash = "sha256-lOCZHkLJCDvaT3CcHUBbsybdy0H6BfKKGpd/73cxcWA=";
+    hash = "sha256-ur4GAgGyqbot3Z8GsJLAj6WUJJ0C7slubemJL021gLM=";
   };
 
-  vendorHash = "sha256-1RUWONkXArXYg8gQogKUhMSGdIYyT3lq5qWuUQBsFig=";
+  vendorHash = "sha256-9DH/mkISdJCacpB8Nt9DA9fyHqOEdH1GpFZ6TuRQgAQ=";
 
   subPackages = [ "weed" ];
 
@@ -49,7 +49,7 @@ buildGoModule rec {
   meta = with lib; {
     description = "Simple and highly scalable distributed file system";
     homepage = "https://github.com/chrislusf/seaweedfs";
-    maintainers = with maintainers; [ azahi cmacrae ];
+    maintainers = with maintainers; [ azahi cmacrae wozeparrot ];
     mainProgram = "weed";
     license = licenses.asl20;
   };

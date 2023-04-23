@@ -5,10 +5,12 @@
 , pkg-config
 , asciidoc
 , ncurses
+, glibc
 , dbus
 , cryptsetup
 , util-linux
 , udev
+, lvm2
 , systemd
 , xfsprogs
 , thin-provisioning-tools
@@ -24,18 +26,18 @@
 
 stdenv.mkDerivation rec {
   pname = "stratisd";
-  version = "3.4.2";
+  version = "3.5.4";
 
   src = fetchFromGitHub {
     owner = "stratis-storage";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-Ui0L03KLePqLvxWaJm+qGQ8q+S8Sz0jwtLhIORNWeAk=";
+    hash = "sha256-V/1gNgjunT11ErXWIa5hDp2+onPCTequCswwXWD5+9E=";
   };
 
   cargoDeps = rustPlatform.fetchCargoTarball {
     inherit src;
-    hash = "sha256-o4MKnJycyzlFfE1YyByyjn/XENheLw4tdVXtgzVxDJM=";
+    hash = "sha256-RljuLL8tep42KNGVsS5CxI7xuhxEjRZ90jVn3jUhVYM=";
   };
 
   postPatch = ''
@@ -61,10 +63,13 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
+    glibc
+    glibc.static
     dbus
     cryptsetup
     util-linux
     udev
+    lvm2
   ];
 
   EXECUTABLES_PATHS = lib.makeBinPath ([
@@ -81,7 +86,7 @@ stdenv.mkDerivation rec {
   ]);
 
   makeFlags = [ "PREFIX=${placeholder "out"}" "INSTALL=install" ];
-  buildFlags = [ "build" "build-min" "docs/stratisd.8" ];
+  buildFlags = [ "build-all" ];
 
   doCheck = true;
   checkTarget = "test";

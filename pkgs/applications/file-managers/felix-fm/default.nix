@@ -9,16 +9,21 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "felix";
-  version = "2.2.0";
+  version = "2.2.5";
 
   src = fetchFromGitHub {
     owner = "kyoheiu";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-wc1hBHqVH/ooXqF97Ev/mVdbfS9JCrreq2n2PIg/pEs=";
+    sha256 = "sha256-qN/aOOiSj+HrjZQaDUkps0NORIdCBIevVjTYQm2G2Fg=";
   };
 
-  cargoSha256 = "sha256-CraJexOepja1CJnp9ngCVBWiFy84rWXzDRTWa0sxQs0=";
+  cargoLock = {
+    lockFile = ./Cargo.lock;
+    outputHashes = {
+      "syntect-5.0.0" = "sha256-ZVCQIVUKwNdV6tyep9THvyM132faDK48crgpWEHrRSQ=";
+    };
+  };
 
   nativeBuildInputs = [ pkg-config ];
 
@@ -27,7 +32,7 @@ rustPlatform.buildRustPackage rec {
     zstd
   ];
 
-  checkInputs = [ zoxide ];
+  nativeCheckInputs = [ zoxide ];
 
   buildFeatures = [ "zstd/pkg-config" ];
 

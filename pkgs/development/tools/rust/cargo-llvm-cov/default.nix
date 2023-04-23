@@ -6,13 +6,13 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "cargo-llvm-cov";
-  version = "0.5.2";
+  version = "0.5.16";
 
   src = fetchzip {
     url = "https://crates.io/api/v1/crates/${pname}/${version}/download#${pname}-${version}.tar.gz";
-    sha256 = "sha256-K6r2YHQq3MEqq9aobJLZBH9COPXpW3TmX1GB1qfnV60=";
+    sha256 = "sha256-aVvYQ9/04juse89EzYY6f9HEwRHjZxbDnuJpX6jzlbc=";
   };
-  cargoSha256 = "sha256-oMisrS+fDzSdT6JmkAMk8kztOgw2XUOrkhehmd9gxL0=";
+  cargoSha256 = "sha256-dxKtOWhHSZdr5RNQ+w+CXFHN+oQXUmSQ7w9i9IO7Q6I=";
 
   # skip tests which require llvm-tools-preview
   checkFlags = [
@@ -36,7 +36,7 @@ rustPlatform.buildRustPackage rec {
     longDescription = ''
       In order for this to work, you either need to run `rustup component add llvm-
       tools-preview` or install the `llvm-tools-preview` component using your Nix
-      library (e.g. nixpkgs-mozilla, or rust-overlay)
+      library (e.g. fenix or rust-overlay)
     '';
     license = with lib.licenses; [ asl20 /* or */ mit ];
     maintainers = with lib.maintainers; [ wucke13 ];

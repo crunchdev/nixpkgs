@@ -2,18 +2,18 @@
 
 buildGoModule rec {
   pname = "k6";
-  version = "0.41.0";
+  version = "0.43.1";
 
   src = fetchFromGitHub {
     owner = "grafana";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-kMWheOf6lR2Fdb77NvjQYB/PHILs6ZIfQORh72ojc8c=";
+    sha256 = "sha256-JiXVDdCbXCsOSgYXIjJwXcgsbFPPoF/bY4nftaSgtdM=";
   };
 
   subPackages = [ "./" ];
 
-  vendorSha256 = null;
+  vendorHash = null;
 
   nativeBuildInputs = [ installShellFiles ];
 

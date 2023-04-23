@@ -1,4 +1,5 @@
 { lib, stdenv, fetchFromGitHub, cmake, gettext, msgpack, libtermkey, libiconv
+, fetchpatch
 , libuv, lua, ncurses, pkg-config
 , unibilium, gperf
 , libvterm-neovim
@@ -19,18 +20,28 @@ let
         nvim-client luv coxpcall busted luafilesystem penlight inspect
       ]
     ));
+  codegenLua =
+    if lua.pkgs.isLuaJIT
+      then
+        let deterministicLuajit =
+          lua.override {
+            deterministicStringIds = true;
+            self = deterministicLuajit;
+          };
+        in deterministicLuajit.withPackages(ps: [ ps.mpack ps.lpeg ])
+      else lua;
 
   pyEnv = python3.withPackages(ps: with ps; [ pynvim msgpack ]);
 in
   stdenv.mkDerivation rec {
     pname = "neovim-unwrapped";
-    version = "0.8.1";
+    version = "0.9.0";
 
     src = fetchFromGitHub {
       owner = "neovim";
       repo = "neovim";
       rev = "v${version}";
-      sha256 = "sha256-B2ZpwhdmdvPOnxVyJDfNzUT5rTVuBhJXyMwwzCl9Fac=";
+      hash = "sha256-4uCPWnjSMU7ac6Q3LT+Em8lVk1MuSegxHMLGQRtFqAs=";
     };
 
     patches = [
@@ -78,7 +89,7 @@ in
     ];
 
     # extra programs test via `make functionaltest`
-    checkInputs = [
+    nativeCheckInputs = [
       fish
       nodejs
       pyEnv      # for src/clint.py
@@ -89,7 +100,7 @@ in
       substituteInPlace src/nvim/version.c --replace NVIM_VERSION_CFLAGS "";
     '';
     # check that the above patching actually works
-    disallowedReferences = [ stdenv.cc ];
+    disallowedReferences = [ stdenv.cc ] ++ lib.optional (lua != codegenLua) codegenLua;
 
     cmakeFlags = [
       # Don't use downloaded dependencies. At the end of the configurePhase one
@@ -101,7 +112,12 @@ in
     ++ lib.optional (!lua.pkgs.isLuaJIT) "-DPREFER_LUA=ON"
     ;
 
-    preConfigure = lib.optionalString stdenv.isDarwin ''
+    preConfigure = lib.optionalString lua.pkgs.isLuaJIT ''
+      cmakeFlagsArray+=(
+        "-DLUAC_PRG=${codegenLua}/bin/luajit -b -s %s -"
+        "-DLUA_GEN_PRG=${codegenLua}/bin/luajit"
+      )
+    '' + lib.optionalString stdenv.isDarwin ''
       substituteInPlace src/nvim/CMakeLists.txt --replace "    util" ""
     '';
 

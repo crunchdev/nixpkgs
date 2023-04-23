@@ -1,5 +1,6 @@
 { lib, stdenv, fetchurl, autoreconfHook, pkg-config
 , dpdk, libbpf, libconfig, libpcap, numactl, openssl, zlib, libbsd, libelf, jansson
+, libnl
 }: let
   dpdk_19_11 = dpdk.overrideAttrs (old: rec {
     version = "19.11.12";
@@ -25,6 +26,7 @@ in stdenv.mkDerivation rec {
     autoreconfHook
     pkg-config
   ];
+
   buildInputs = [
     dpdk_19_11
     libconfig
@@ -36,6 +38,13 @@ in stdenv.mkDerivation rec {
     libelf
     jansson
     libbpf
+    libnl
+  ];
+
+  env.NIX_CFLAGS_COMPILE = toString [
+    # Needed with GCC 12
+    "-Wno-error=maybe-uninitialized"
+    "-Wno-error=uninitialized"
   ];
 
   # binaries will segfault otherwise

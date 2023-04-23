@@ -1,17 +1,21 @@
-{ lib, buildGoModule, fetchFromGitHub, installShellFiles }:
+{ lib
+, buildGoModule
+, fetchFromGitHub
+, installShellFiles
+}:
 
 buildGoModule rec {
   pname = "chezmoi";
-  version = "2.27.2";
+  version = "2.33.1";
 
   src = fetchFromGitHub {
     owner = "twpayne";
     repo = "chezmoi";
     rev = "v${version}";
-    sha256 = "sha256-H+9DFJm8V7MCeq7/iXNsCPe2NZFirf+nQfluihxNCFw=";
+    hash = "sha256-arZqLkb+J9tSBrZGlqc7KXSABVznRbGoKrMOG3CQeg8=";
   };
 
-  vendorSha256 = "sha256-yfT32MxnzYQr+UXqZEgGLuAxbMDfc/PWhmhDUXAIRhA=";
+  vendorHash = "sha256-NU7NmWMUR9jNR8tmEg97o7QMs01aCoYBktj8kUEdBLU=";
 
   doCheck = false;
 
@@ -32,6 +36,7 @@ buildGoModule rec {
   meta = with lib; {
     homepage = "https://www.chezmoi.io/";
     description = "Manage your dotfiles across multiple machines, securely";
+    changelog = "https://github.com/twpayne/chezmoi/releases/tag/v${version}";
     license = licenses.mit;
     maintainers = with maintainers; [ jhillyerd ];
   };

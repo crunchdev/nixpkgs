@@ -1,7 +1,6 @@
 { lib
 , aiohttp
 , aresponses
-, asynctest
 , buildPythonPackage
 , fetchFromGitHub
 , numpy
@@ -15,7 +14,7 @@
 
 buildPythonPackage rec {
   pname = "pyairvisual";
-  version = "2022.12.0";
+  version = "2022.12.1";
   format = "pyproject";
 
   disabled = pythonOlder "3.9";
@@ -23,8 +22,8 @@ buildPythonPackage rec {
   src = fetchFromGitHub {
     owner = "bachya";
     repo = pname;
-    rev = version;
-    hash = "sha256-vuniAmjbC3EmFliLFhZ1LQvh533XeLGaIn8ll/Etb/4=";
+    rev = "refs/tags/${version}";
+    hash = "sha256-xzTho4HsIU2YLURz9DfFfaRL3tsrtVi8n5IA2bRkyzw=";
   };
 
   nativeBuildInputs = [
@@ -37,11 +36,11 @@ buildPythonPackage rec {
     pysmb
   ];
 
-  checkInputs = [
+  nativeCheckInputs = [
     aresponses
-    asynctest
     pytest-aiohttp
     pytest-asyncio
+    pytestCheckHook
     pytestCheckHook
   ];
 

@@ -9,6 +9,12 @@ import ./make-test-python.nix ({ pkgs, ... }: {
         hostname = "server";
         primaryDomain = "server";
         openFirewall = true;
+        ensureAccounts = [ "postmaster@server" ];
+        ensureCredentials = {
+          # Do not use this in production. This will make passwords world-readable
+          # in the Nix store
+          "postmaster@server".passwordFile = "${pkgs.writeText "postmaster" "test"}";
+        };
       };
     };
 
@@ -48,10 +54,6 @@ import ./make-test-python.nix ({ pkgs, ... }: {
     server.wait_for_unit("maddy.service")
     server.wait_for_open_port(143)
     server.wait_for_open_port(587)
-
-    server.succeed("maddyctl creds create --password test postmaster@server")
-    server.succeed("maddyctl imap-acct create postmaster@server")
-
     client.succeed("send-testmail")
     client.succeed("test-imap")
   '';

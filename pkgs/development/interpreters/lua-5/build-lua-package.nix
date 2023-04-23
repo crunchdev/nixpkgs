@@ -14,14 +14,14 @@
 , rockspecVersion ? version
 
 # by default prefix `name` e.g. "lua5.2-${name}"
-, namePrefix ? "${lua.pname}${lua.sourceVersion.major}.${lua.sourceVersion.minor}-"
+, namePrefix ? "${lua.pname}${lib.versions.majorMinor lua.version}-"
 
 # Dependencies for building the package
 , buildInputs ? []
 
 # Dependencies needed for running the checkPhase.
-# These are added to buildInputs when doCheck = true.
-, checkInputs ? []
+# These are added to nativeBuildInputs when doCheck = true.
+, nativeCheckInputs ? []
 
 # propagate build dependencies so in case we have A -> B -> C,
 # C can import package A propagated by B
@@ -93,9 +93,9 @@ let
     );
   externalDeps' = lib.filter (dep: !lib.isDerivation dep) externalDeps;
 
-  luarocksDrv = luaLib.toLuaModule ( lua.stdenv.mkDerivation (self: let
+  luarocksDrv = luaLib.toLuaModule ( lua.stdenv.mkDerivation (finalAttrs: let
 
-    rocksSubdir = "${self.pname}-${self.version}-rocks";
+    rocksSubdir = "${finalAttrs.pname}-${finalAttrs.version}-rocks";
     luarocks_content = let
       generatedConfig = luaLib.generateLuarocksConfig {
         externalDeps = externalDeps ++ externalDepsGenerated;
@@ -108,13 +108,13 @@ let
         '';
     in builtins.removeAttrs attrs ["disabled" "externalDeps" "extraVariables"] // {
 
-  name = namePrefix + pname + "-" + self.version;
+  name = namePrefix + pname + "-" + finalAttrs.version;
   inherit rockspecVersion;
 
   nativeBuildInputs = [
     wrapLua
     luarocks
-  ] ++ lib.optionals doCheck ([ luarocksCheckHook ] ++ self.checkInputs);
+  ] ++ lib.optionals doCheck ([ luarocksCheckHook ] ++ finalAttrs.nativeCheckInputs);
 
   buildInputs = buildInputs
     ++ (map (d: d.dep) externalDeps');

@@ -9,6 +9,8 @@ with self; with super; {
 
   bootstrapped-pip = toPythonModule (callPackage ../development/python2-modules/bootstrapped-pip { });
 
+  cffi = callPackage ../development/python2-modules/cffi { inherit cffi; };
+
   configparser = callPackage ../development/python2-modules/configparser { };
 
   contextlib2 = callPackage ../development/python2-modules/contextlib2 { };
@@ -76,6 +78,12 @@ with self; with super; {
   setuptools-scm = callPackage ../development/python2-modules/setuptools-scm { };
 
   typing = callPackage ../development/python2-modules/typing { };
+
+  six = super.six.overridePythonAttrs (_: {
+    doCheck = false;  # circular dependency with pytest
+  });
+
+  wheel = callPackage ../development/python2-modules/wheel { };
 
   zeek = disabled super.zeek;
 

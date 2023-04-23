@@ -223,22 +223,93 @@ in {
         '';
       };
 
+      ensureAccounts = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        description = lib.mdDoc ''
+          List of IMAP accounts which get automatically created. Note that for
+          a complete setup, user credentials for these accounts are required
+          and can be created using the `ensureCredentials` option.
+          This option does not delete accounts which are not (anymore) listed.
+        '';
+        example = [
+          "user1@localhost"
+          "user2@localhost"
+        ];
+      };
+
+      ensureCredentials = mkOption {
+        default = {};
+        description = lib.mdDoc ''
+          List of user accounts which get automatically created if they don't
+          exist yet. Note that for a complete setup, corresponding mail boxes
+          have to get created using the `ensureAccounts` option.
+          This option does not delete accounts which are not (anymore) listed.
+        '';
+        example = {
+          "user1@localhost".passwordFile = /secrets/user1-localhost;
+          "user2@localhost".passwordFile = /secrets/user2-localhost;
+        };
+        type = types.attrsOf (types.submodule {
+          options = {
+            passwordFile = mkOption {
+              type = types.path;
+              example = "/path/to/file";
+              default = null;
+              description = lib.mdDoc ''
+                Specifies the path to a file containing the
+                clear text password for the user.
+              '';
+            };
+          };
+        });
+      };
+
     };
   };
 
   config = mkIf cfg.enable {
 
     systemd = {
+
       packages = [ pkgs.maddy ];
-      services.maddy = {
-        serviceConfig = {
-          User = cfg.user;
-          Group = cfg.group;
-          StateDirectory = [ "maddy" ];
+      services = {
+        maddy = {
+          serviceConfig = {
+            User = cfg.user;
+            Group = cfg.group;
+            StateDirectory = [ "maddy" ];
+          };
+          restartTriggers = [ config.environment.etc."maddy/maddy.conf".source ];
+          wantedBy = [ "multi-user.target" ];
         };
-        restartTriggers = [ config.environment.etc."maddy/maddy.conf".source ];
-        wantedBy = [ "multi-user.target" ];
+        maddy-ensure-accounts = {
+          script = ''
+            ${optionalString (cfg.ensureAccounts != []) ''
+              ${concatMapStrings (account: ''
+                if ! ${pkgs.maddy}/bin/maddyctl imap-acct list | grep "${account}"; then
+                  ${pkgs.maddy}/bin/maddyctl imap-acct create ${account}
+                fi
+              '') cfg.ensureAccounts}
+            ''}
+            ${optionalString (cfg.ensureCredentials != {}) ''
+              ${concatStringsSep "\n" (mapAttrsToList (name: cfg: ''
+                if ! ${pkgs.maddy}/bin/maddyctl creds list | grep "${name}"; then
+                  ${pkgs.maddy}/bin/maddyctl creds create --password $(cat ${escapeShellArg cfg.passwordFile}) ${name}
+                fi
+              '') cfg.ensureCredentials)}
+            ''}
+          '';
+          serviceConfig = {
+            Type = "oneshot";
+            User= "maddy";
+          };
+          after = [ "maddy.service" ];
+          wantedBy = [ "multi-user.target" ];
+        };
+
       };
+
     };
 
     environment.etc."maddy/maddy.conf" = {
