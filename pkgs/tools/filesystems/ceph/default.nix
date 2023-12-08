@@ -67,6 +67,7 @@
 , nss ? null
 
 # Linux Only Dependencies
+, kmod
 , linuxHeaders
 , util-linux
 , libuuid
@@ -275,6 +276,7 @@ in rec {
     ] ++ lib.optionals stdenv.isLinux [
       keyutils
       libcap_ng
+      kmod
       liburing
       libuuid
       linuxHeaders
