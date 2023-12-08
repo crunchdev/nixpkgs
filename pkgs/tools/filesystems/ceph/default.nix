@@ -297,8 +297,8 @@ in rec {
     pythonPath = [ ceph-python-env "${placeholder "out"}/${ceph-python-env.sitePackages}" ];
 
     preConfigure =''
-      substituteInPlace src/common/module.c --replace "/sbin/modinfo"  "modinfo"
-      substituteInPlace src/common/module.c --replace "/sbin/modprobe" "modprobe"
+      substituteInPlace src/common/module.c --replace "/sbin/modinfo"  "${kmod}/bin/modinfo"
+      substituteInPlace src/common/module.c --replace "/sbin/modprobe" "${kmod}/bin/modprobe"
       substituteInPlace src/common/module.c --replace "/bin/grep" "grep"
 
       # install target needs to be in PYTHONPATH for "*.pth support" check to succeed
